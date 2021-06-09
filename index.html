@@ -1,23 +1,93 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | SpaceJourney</title>
-  </head>
-  <body style="text-align: center">
-    <canvas id="unity-canvas" style="width: 350px; height: 622px; background: #231F20"></canvas>
-    <script src="Build/SpaceJourney.loader.js"></script>
-    <script>
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/SpaceJourney.data",
-        frameworkUrl: "Build/SpaceJourney.framework.js",
-        codeUrl: "Build/SpaceJourney.wasm",
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>SpaceJourney</title>
+  <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+  <link rel="stylesheet" href="TemplateData/style.css" />
+</head>
+
+<body>
+  <div id="unity-container" class="unity-desktop">
+    <canvas id="unity-canvas"></canvas>
+    <img src="TemplateData/SplashScreen-bg.jpg" id="unity-background" alt="" />
+    <!-- Main Loading container -->
+    <div id="unity-loading-container">
+      <div class="unity-loading-bar">
+        <!-- Loading Text  -->
+        <p class="loading-text">Loading the game...</p>
+        <!-- Progress Bar container -->
+        <div class="progress-bar">
+          <!-- Loading background -->
+          <img class="loading-background" src="./TemplateData/Loading_BG.png" alt="" />
+          <!-- Loading progress fill image -->
+          <img class="loading-fill" src="./TemplateData/Loading_ProgressBar.png" alt="" />
+          <!-- Shine loading-gloss -->
+          <!-- <img class="loading-shine" src="./TemplateData/Loading_Shine.png" /> -->
+          <!-- Loading outline -->
+          <!-- <img class="loading-outline" src="./TemplateData/Loading_Border.png" alt="" /> -->
+          <!-- Loading icon that moves with the progress  -->
+          <!-- <img class="loading-end-icon" src="./TemplateData/Loading_Icon.png" alt="" /> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const showLoadingEndIcon = true; 
+    const progressBarHeight = '100%'; 
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/SpaceJourney.loader.js";
+    var config = {
+      dataUrl: buildUrl + "/SpaceJourney.data",
+      frameworkUrl: buildUrl + "/SpaceJourney.framework.js",
+      codeUrl: buildUrl + "/SpaceJourney.wasm",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "Test",
-        productName: "SpaceJourney",
-        productVersion: "1.0",
-      });
-    </script>
-  </body>
+      companyName: "Test",
+      productName: "SpaceJourney",
+      productVersion: "1.0",
+    };
+
+    var container = document.querySelector("#unity-container");
+    var canvas = document.querySelector("#unity-canvas");
+    var unityBackground = document.querySelector("#unity-background");
+    var loadingBar = document.querySelector(".unity-loading-bar");
+    var loadingText = document.querySelector(".loading-text");
+    var unityLoadingContainer = document.querySelector("#unity-loading-container");
+    var progressBarFill = document.querySelector(".loading-fill");
+    const loadingEndIcon = document.querySelector('.loading-end-icon');
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      container.className = "unity-mobile";
+      // Avoid draining fillrate performance on mobile devices,
+      // and default/override low DPI mode on mobile browsers.
+      config.devicePixelRatio = 1;
+    } else {
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+    }
+
+    if (!showLoadingEndIcon && loadingEndIcon) loadingEndIcon.style.visibility = 'hidden';
+    if (loadingBar) loadingBar.style.display = "flex";
+    if (progressBarFill) progressBarFill.style.height = progressBarHeight;
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      // Progress update script below
+      createUnityInstance(canvas, config, (progress) => {
+        if (progressBarFill) progressBarFill.style.width = 100 * progress + "%";
+          if (loadingEndIcon) loadingEndIcon.style.left = "100%";
+      })
+        .then((unityInstance) => {
+          gameInstance = unityInstance;
+        })
+        .catch((message) => {
+          alert(message);
+        });
+    };
+  </script>
+</body>
+
 </html>
